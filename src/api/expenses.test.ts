@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getExpenses, getExpense, createExpense } from './expenses'
+import { getExpenses, getExpense, createExpense, deleteExpense } from './expenses'
 import type { Expense, CreateExpenseInput } from '../types/expense'
 
 const mockExpense: Expense = {
@@ -76,5 +76,21 @@ describe('createExpense', () => {
     await expect(createExpense({ ...input, amount: -1 })).rejects.toThrow(
       'amount must be greater than zero',
     )
+  })
+})
+
+describe('deleteExpense', () => {
+  it('sends a DELETE request to the expense endpoint', async () => {
+    vi.stubGlobal('fetch', mockFetch(null, 204))
+    await deleteExpense('abc123')
+    expect(fetch).toHaveBeenCalledWith(
+      '/expenses/abc123',
+      expect.objectContaining({ method: 'DELETE' }),
+    )
+  })
+
+  it('throws on non-ok response', async () => {
+    vi.stubGlobal('fetch', mockFetch({ error: 'not found' }, 404))
+    await expect(deleteExpense('missing')).rejects.toThrow('Failed to delete expense')
   })
 })

@@ -25,6 +25,11 @@ export const getExpense = async (id: string): Promise<Expense> => {
   return response.json() as Promise<Expense>
 }
 
+export const deleteExpense = async (id: string): Promise<void> => {
+  const response = await fetch(`/expenses/${id}`, { method: 'DELETE' })
+  if (!response.ok) throw new Error('Failed to delete expense')
+}
+
 export const createExpense = async (input: CreateExpenseInput): Promise<Expense> => {
   const response = await fetch('/expenses', {
     method: 'POST',

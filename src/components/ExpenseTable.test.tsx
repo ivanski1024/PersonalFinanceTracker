@@ -1,9 +1,13 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExpenseTable } from './ExpenseTable'
 import * as expensesApi from '../api/expenses'
 import type { Expense } from '../types/expense'
+
+beforeEach(() => {
+  vi.restoreAllMocks()
+})
 
 const makeExpenses = (): Expense[] => [
   { id: '1', description: 'Coffee', amount: 5, category: 'Going out' },
