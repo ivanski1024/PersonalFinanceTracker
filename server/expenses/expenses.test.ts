@@ -90,12 +90,86 @@ describe('POST /expenses', () => {
 })
 
 describe('GET /expenses', () => {
-  it('returns 200 with all stored expenses', async () => {
-    await ExpenseModel.create({ amount: 10, category: 'Transport', description: 'Bus' })
+  it('returns 200 with an empty array when no expenses exist', async () => {
+    const res = await request(app).get('/expenses')
+
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual([])
+  })
+
+  it('returns all expenses with id, amount, category, and description fields', async () => {
+    await ExpenseModel.create([
+      { amount: 42.5, category: 'Food', description: 'Lunch' },
+      { amount: 15, category: 'Transport', description: 'Bus ticket' },
+      { amount: 120, category: 'Entertainment', description: 'Cinema' },
+    ])
 
     const res = await request(app).get('/expenses')
 
     expect(res.status).toBe(200)
-    expect(res.body).toHaveLength(1)
+    expect(res.body).toHaveLength(3)
+    for (const expense of res.body) {
+      expect(expense).toMatchObject({
+        id: expect.any(String),
+        amount: expect.any(Number),
+        category: expect.any(String),
+        description: expect.any(String),
+      })
+    }
+  })
+
+  it('returns only expenses matching the given category filter', async () => {
+    await ExpenseModel.create([
+      { amount: 42.5, category: 'Food', description: 'Lunch' },
+      { amount: 15, category: 'Transport', description: 'Bus ticket' },
+      { amount: 12, category: 'Food', description: 'Coffee' },
+    ])
+
+    const res = await request(app).get('/expenses?category=Food')
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveLength(2)
+    for (const expense of res.body) {
+      expect(expense.category).toBe('Food')
+    }
+  })
+
+  it('returns an empty array when no expenses match the category filter', async () => {
+    await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch' })
+
+    const res = await request(app).get('/expenses?category=Transport')
+
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual([])
+  })
+})
+
+describe('GET /expenses/:id', () => {
+  it('returns 200 with the expense when found', async () => {
+    const created = await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch' })
+
+    const res = await request(app).get(`/expenses/${created._id.toString()}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body).toMatchObject({
+      id: created._id.toString(),
+      amount: 42.5,
+      category: 'Food',
+      description: 'Lunch',
+    })
+  })
+
+  it("returns 404 with 'expense not found' when id does not exist", async () => {
+    const res = await request(app).get('/expenses/000000000000000000000000')
+
+    expect(res.status).toBe(404)
+    expect(res.body).toEqual({ error: 'expense not found' })
+  })
+
+  it("returns 400 with 'invalid expense id' when id is malformed", async () => {
+    const res = await request(app).get('/expenses/not-a-valid-id')
+
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({ error: 'invalid expense id' })
   })
 })
