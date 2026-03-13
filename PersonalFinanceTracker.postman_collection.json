@@ -1,0 +1,208 @@
+{
+  "info": {
+    "name": "Personal Finance Tracker",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "expenseId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Expenses",
+      "item": [
+        {
+          "name": "Create expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/expenses", "host": ["{{baseUrl}}"], "path": ["expenses"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 42.50,\n  \"category\": \"Food\",\n  \"description\": \"Lunch\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('expenseId', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create expense – missing amount (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/expenses", "host": ["{{baseUrl}}"], "path": ["expenses"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Food\",\n  \"description\": \"Lunch\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('error message', () => pm.expect(pm.response.json().error).to.eql('amount is required'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create expense – zero amount (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/expenses", "host": ["{{baseUrl}}"], "path": ["expenses"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 0,\n  \"category\": \"Food\",\n  \"description\": \"Lunch\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('error message', () => pm.expect(pm.response.json().error).to.eql('amount must be greater than zero'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get all expenses",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/expenses", "host": ["{{baseUrl}}"], "path": ["expenses"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get expenses by category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/expenses?category=Food",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses"],
+              "query": [{ "key": "category", "value": "Food" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('all results match category', () => {",
+                  "  pm.response.json().forEach(e => pm.expect(e.category).to.eql('Food'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get expense by id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/expenses/{{expenseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "{{expenseId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('id matches', () => pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('expenseId')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get expense by id – not found (404)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/expenses/000000000000000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "000000000000000000000000"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('error message', () => pm.expect(pm.response.json().error).to.eql('expense not found'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get expense by id – invalid id (400)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/expenses/not-a-valid-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "not-a-valid-id"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('error message', () => pm.expect(pm.response.json().error).to.eql('invalid expense id'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
