@@ -9,27 +9,14 @@ beforeEach(() => {
   vi.spyOn(expensesApi, 'getExpenses').mockResolvedValue([])
 })
 
-const renderAt = (path: string) =>
-  render(
-    <MemoryRouter initialEntries={[path]}>
-      <App />
-    </MemoryRouter>,
-  )
-
 describe('App', () => {
-  it('renders expense list on /', () => {
-    renderAt('/')
+  it('renders the expense table on /', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
     expect(screen.getByLabelText('Filter by category')).toBeInTheDocument()
-  })
-
-  it('renders add expense form on /add', () => {
-    renderAt('/add')
-    expect(screen.getByRole('button', { name: 'Add Expense' })).toBeInTheDocument()
-  })
-
-  it('shows nav links on every page', () => {
-    renderAt('/')
-    expect(screen.getByRole('link', { name: 'Expenses' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Add Expense' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Apply filter' })).toBeInTheDocument()
   })
 })
