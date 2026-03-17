@@ -24,6 +24,7 @@ const validPayload = (overrides = {}) => ({
   amount: 42.5,
   category: 'Food',
   description: 'Lunch',
+  type: 'expense',
   ...overrides,
 })
 
@@ -37,6 +38,7 @@ describe('POST /expenses', () => {
       amount: 42.5,
       category: 'Food',
       description: 'Lunch',
+      type: 'expense',
     })
   })
 
@@ -48,6 +50,7 @@ describe('POST /expenses', () => {
     expect(saved?.amount).toBe(42.5)
     expect(saved?.category).toBe('Food')
     expect(saved?.description).toBe('Lunch')
+    expect(saved?.type).toBe('expense')
   })
 
   it("returns 400 with 'amount is required' when amount is omitted", async () => {
@@ -87,6 +90,28 @@ describe('POST /expenses', () => {
     expect(res.status).toBe(400)
     expect(res.body).toEqual({ error: 'description is required' })
   })
+
+  it("returns 400 with 'type is required' when type is omitted", async () => {
+    const { type: _type, ...payload } = validPayload()
+    const res = await request(app).post('/expenses').send(payload)
+
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({ error: 'type is required' })
+  })
+
+  it("returns 400 with 'type must be expense or income' when type is invalid", async () => {
+    const res = await request(app).post('/expenses').send(validPayload({ type: 'banana' }))
+
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({ error: 'type must be expense or income' })
+  })
+
+  it('accepts income as a valid type', async () => {
+    const res = await request(app).post('/expenses').send(validPayload({ type: 'income' }))
+
+    expect(res.status).toBe(201)
+    expect(res.body).toMatchObject({ type: 'income' })
+  })
 })
 
 describe('GET /expenses', () => {
@@ -97,11 +122,11 @@ describe('GET /expenses', () => {
     expect(res.body).toEqual([])
   })
 
-  it('returns all expenses with id, amount, category, and description fields', async () => {
+  it('returns all expenses with id, amount, category, description, and type fields', async () => {
     await ExpenseModel.create([
-      { amount: 42.5, category: 'Food', description: 'Lunch' },
-      { amount: 15, category: 'Transport', description: 'Bus ticket' },
-      { amount: 120, category: 'Entertainment', description: 'Cinema' },
+      { amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense' },
+      { amount: 15, category: 'Transport', description: 'Bus ticket', type: 'expense' },
+      { amount: 1000, category: 'Job', description: 'Salary', type: 'income' },
     ])
 
     const res = await request(app).get('/expenses')
@@ -114,15 +139,16 @@ describe('GET /expenses', () => {
         amount: expect.any(Number),
         category: expect.any(String),
         description: expect.any(String),
+        type: expect.stringMatching(/^expense|income$/),
       })
     }
   })
 
   it('returns only expenses matching the given category filter', async () => {
     await ExpenseModel.create([
-      { amount: 42.5, category: 'Food', description: 'Lunch' },
-      { amount: 15, category: 'Transport', description: 'Bus ticket' },
-      { amount: 12, category: 'Food', description: 'Coffee' },
+      { amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense' },
+      { amount: 15, category: 'Transport', description: 'Bus ticket', type: 'expense' },
+      { amount: 12, category: 'Food', description: 'Coffee', type: 'expense' },
     ])
 
     const res = await request(app).get('/expenses?category=Food')
@@ -135,7 +161,7 @@ describe('GET /expenses', () => {
   })
 
   it('returns an empty array when no expenses match the category filter', async () => {
-    await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch' })
+    await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense' })
 
     const res = await request(app).get('/expenses?category=Transport')
 
@@ -146,7 +172,7 @@ describe('GET /expenses', () => {
 
 describe('GET /expenses/:id', () => {
   it('returns 200 with the expense when found', async () => {
-    const created = await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch' })
+    const created = await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense' })
 
     const res = await request(app).get(`/expenses/${created._id.toString()}`)
 
@@ -156,6 +182,7 @@ describe('GET /expenses/:id', () => {
       amount: 42.5,
       category: 'Food',
       description: 'Lunch',
+      type: 'expense',
     })
   })
 
