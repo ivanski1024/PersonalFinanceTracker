@@ -6,8 +6,8 @@ import * as expensesApi from '../api/expenses'
 import type { Expense } from '../types/expense'
 
 const mockExpenses: Expense[] = [
-  { id: '1', amount: 12.5, category: 'Food', description: 'Lunch' },
-  { id: '2', amount: 3.0, category: 'Transport', description: 'Bus' },
+  { id: '1', amount: 12.5, category: 'Food', description: 'Lunch', type: 'expense' },
+  { id: '2', amount: 3.0, category: 'Transport', description: 'Bus', type: 'expense' },
 ]
 
 beforeEach(() => {
