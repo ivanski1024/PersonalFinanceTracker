@@ -1,6 +1,6 @@
-import type { Expense, CreateExpenseInput } from '../types/expense'
+import type { Expense, CreateExpenseInput } from '../../domain/expense'
 
-export const getExpenses = async (): Promise<Expense[]> => {
+export const getExpenses = async (_filter?: { category?: string }): Promise<Expense[]> => {
   throw new Error('not implemented')
 }
 

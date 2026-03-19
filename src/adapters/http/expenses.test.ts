@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { getExpenses, getExpense, createExpense, deleteExpense } from './expenses'
-import type { Expense, CreateExpenseInput } from '../types/expense'
+import type { Expense, CreateExpenseInput } from '../../domain/expense'
 
 const mockExpense: Expense = {
   id: 'abc123',
