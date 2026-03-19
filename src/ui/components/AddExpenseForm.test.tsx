@@ -2,24 +2,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AddExpenseForm } from './AddExpenseForm'
-import * as expensesApi from '../api/expenses'
-import type { Expense } from '../types/expense'
+import * as expensesApi from '../../adapters/http/expenses'
+import type { Expense } from '../../domain/expense'
 
 const createdExpense: Expense = {
   id: 'new1',
   amount: 10,
   category: 'Transport',
   description: 'Bus',
+  type: 'expense',
 }
 
 beforeEach(() => {
   vi.restoreAllMocks()
 })
 
-const fillForm = async (amount: string, category: string, description: string) => {
+const fillForm = async (amount: string, category: string, description: string, type: string) => {
   await userEvent.type(screen.getByLabelText('Amount'), amount)
   await userEvent.type(screen.getByLabelText('Category'), category)
   await userEvent.type(screen.getByLabelText('Description'), description)
+  await userEvent.type(screen.getByLabelText('Type'), type)
 }
 
 describe('AddExpenseForm', () => {
@@ -28,6 +30,7 @@ describe('AddExpenseForm', () => {
     expect(screen.getByLabelText('Amount')).toBeInTheDocument()
     expect(screen.getByLabelText('Category')).toBeInTheDocument()
     expect(screen.getByLabelText('Description')).toBeInTheDocument()
+    expect(screen.getByLabelText('Type')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add Expense' })).toBeInTheDocument()
   })
 
@@ -35,7 +38,7 @@ describe('AddExpenseForm', () => {
     vi.spyOn(expensesApi, 'createExpense').mockResolvedValue(createdExpense)
     render(<AddExpenseForm />)
 
-    await fillForm('10', 'Transport', 'Bus')
+    await fillForm('10', 'Transport', 'Bus', 'expense')
     await userEvent.click(screen.getByRole('button', { name: 'Add Expense' }))
 
     await waitFor(() =>
@@ -43,6 +46,7 @@ describe('AddExpenseForm', () => {
         amount: 10,
         category: 'Transport',
         description: 'Bus',
+        type: 'expense',
       }),
     )
   })
@@ -51,7 +55,7 @@ describe('AddExpenseForm', () => {
     vi.spyOn(expensesApi, 'createExpense').mockResolvedValue(createdExpense)
     render(<AddExpenseForm />)
 
-    await fillForm('10', 'Transport', 'Bus')
+    await fillForm('10', 'Transport', 'Bus', 'expense')
     await userEvent.click(screen.getByRole('button', { name: 'Add Expense' }))
 
     await waitFor(() => expect(screen.getByText('Expense added!')).toBeInTheDocument())
@@ -61,13 +65,14 @@ describe('AddExpenseForm', () => {
     vi.spyOn(expensesApi, 'createExpense').mockResolvedValue(createdExpense)
     render(<AddExpenseForm />)
 
-    await fillForm('10', 'Transport', 'Bus')
+    await fillForm('10', 'Transport', 'Bus', 'expense')
     await userEvent.click(screen.getByRole('button', { name: 'Add Expense' }))
 
     await waitFor(() => {
       expect((screen.getByLabelText('Amount') as HTMLInputElement).value).toBe('')
       expect((screen.getByLabelText('Category') as HTMLInputElement).value).toBe('')
       expect((screen.getByLabelText('Description') as HTMLInputElement).value).toBe('')
+      expect((screen.getByLabelText('Type') as HTMLInputElement).value).toBe('')
     })
   })
 
@@ -77,7 +82,7 @@ describe('AddExpenseForm', () => {
     )
     render(<AddExpenseForm />)
 
-    await fillForm('-1', 'Food', 'Lunch')
+    await fillForm('-1', 'Food', 'Lunch', 'expense')
     await userEvent.click(screen.getByRole('button', { name: 'Add Expense' }))
 
     await waitFor(() =>
@@ -89,7 +94,7 @@ describe('AddExpenseForm', () => {
     vi.spyOn(expensesApi, 'createExpense').mockReturnValue(new Promise(() => {}))
     render(<AddExpenseForm />)
 
-    await fillForm('10', 'Transport', 'Bus')
+    await fillForm('10', 'Transport', 'Bus', 'expense')
     await userEvent.click(screen.getByRole('button', { name: 'Add Expense' }))
 
     expect(screen.getByRole('button', { name: 'Adding...' })).toBeDisabled()

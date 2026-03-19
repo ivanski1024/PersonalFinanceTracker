@@ -2,7 +2,7 @@ import { screen, render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { vi, beforeEach } from 'vitest'
 import App from './App.tsx'
-import * as expensesApi from './api/expenses'
+import * as expensesApi from '../adapters/http/expenses'
 
 beforeEach(() => {
   vi.restoreAllMocks()

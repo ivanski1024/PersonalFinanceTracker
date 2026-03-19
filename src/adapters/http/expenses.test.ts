@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { getExpenses, getExpense, createExpense, deleteExpense } from './expenses'
-import type { Expense, CreateExpenseInput } from '../types/expense'
+import type { Expense, CreateExpenseInput } from '../../domain/expense'
 
 const mockExpense: Expense = {
   id: 'abc123',
   amount: 42.5,
   category: 'Food',
   description: 'Lunch',
+  type: 'expense',
 }
 
 const mockFetch = (body: unknown, status = 200) =>
@@ -55,7 +56,7 @@ describe('getExpense', () => {
 })
 
 describe('createExpense', () => {
-  const input: CreateExpenseInput = { amount: 10, category: 'Transport', description: 'Bus' }
+  const input: CreateExpenseInput = { amount: 10, category: 'Transport', description: 'Bus', type: 'expense' }
 
   it('posts and returns created expense', async () => {
     vi.stubGlobal('fetch', mockFetch({ ...input, id: 'new1' }, 201))

@@ -10,6 +10,12 @@ export const CreateExpenseSchema = z.object({
   description: z
     .string({ error: 'description is required' })
     .min(1, 'description is required'),
+  type: z.enum(['expense', 'income'], {
+    error: (issue) =>
+      issue.input === undefined || issue.input === null
+        ? 'type is required'
+        : 'type must be expense or income',
+  }),
 })
 
 export type CreateExpenseInput = z.infer<typeof CreateExpenseSchema>

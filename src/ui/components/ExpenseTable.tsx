@@ -1,0 +1,1 @@
+export const ExpenseTable = () => null
