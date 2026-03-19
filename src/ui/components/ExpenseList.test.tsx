@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExpenseList } from './ExpenseList'
-import * as expensesApi from '../api/expenses'
-import type { Expense } from '../types/expense'
+import * as expensesApi from '../../adapters/http/expenses'
+import type { Expense } from '../../domain/expense'
 
 const mockExpenses: Expense[] = [
   { id: '1', amount: 12.5, category: 'Food', description: 'Lunch', type: 'expense' },

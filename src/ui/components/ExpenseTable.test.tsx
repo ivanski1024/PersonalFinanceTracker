@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExpenseTable } from './ExpenseTable'
-import * as expensesApi from '../api/expenses'
-import type { Expense } from '../types/expense'
+import * as expensesApi from '../../adapters/http/expenses'
+import type { Expense } from '../../domain/expense'
 
 beforeEach(() => {
   vi.restoreAllMocks()
