@@ -2,7 +2,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import request from 'supertest'
 import { app } from '../app.js'
-import { ExpenseModel } from './expense.model.js'
+import { ExpenseModel } from '../adapters/outbound/mongodb/expense.model.js'
 
 let mongoServer: MongoMemoryServer
 
