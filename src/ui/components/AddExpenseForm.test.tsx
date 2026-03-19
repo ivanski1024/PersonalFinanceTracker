@@ -11,6 +11,7 @@ const createdExpense: Expense = {
   category: 'Transport',
   description: 'Bus',
   type: 'expense',
+  date: 1700000000000,
 }
 
 beforeEach(() => {

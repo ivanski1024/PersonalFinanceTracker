@@ -10,9 +10,9 @@ beforeEach(() => {
 })
 
 const makeExpenses = (): Expense[] => [
-  { id: '1', description: 'Coffee', amount: 5, category: 'Going out', type: 'expense' },
-  { id: '2', description: 'Groceries', amount: 30, category: 'Shopping', type: 'expense' },
-  { id: '3', description: 'Salary', amount: 1000, category: 'Job', type: 'income' },
+  { id: '1', description: 'Coffee', amount: 5, category: 'Going out', type: 'expense', date: 1700000000000 },
+  { id: '2', description: 'Groceries', amount: 30, category: 'Shopping', type: 'expense', date: 1700000000000 },
+  { id: '3', description: 'Salary', amount: 1000, category: 'Job', type: 'income', date: 1700000000000 },
 ]
 
 // --- Table structure ---
@@ -73,7 +73,7 @@ describe('removing an expense', () => {
 
   it('shows empty state after removing the last expense', async () => {
     const singleExpense: Expense[] = [
-      { id: '1', description: 'Coffee', amount: 5, category: 'Going out', type: 'expense' },
+      { id: '1', description: 'Coffee', amount: 5, category: 'Going out', type: 'expense', date: 1700000000000 },
     ]
     vi.spyOn(expensesApi, 'getExpenses').mockResolvedValue(singleExpense)
     vi.spyOn(expensesApi, 'deleteExpense').mockResolvedValue(undefined)
@@ -109,6 +109,7 @@ describe('inline add row', () => {
       amount: 12,
       category: 'Food',
       type: 'expense',
+      date: 1700000000000,
     })
     render(<ExpenseTable />)
 
@@ -150,7 +151,7 @@ describe('filtering by category', () => {
 
     await waitFor(() => screen.getByText('Coffee'))
     vi.spyOn(expensesApi, 'getExpenses').mockResolvedValue([
-      { id: '2', description: 'Groceries', amount: 30, category: 'Shopping', type: 'expense' },
+      { id: '2', description: 'Groceries', amount: 30, category: 'Shopping', type: 'expense', date: 1700000000000 },
     ])
 
     await userEvent.type(screen.getByLabelText('Filter by category'), 'Shopping')

@@ -16,6 +16,7 @@ export const CreateExpenseSchema = z.object({
         ? 'type is required'
         : 'type must be expense or income',
   }),
+  date: z.number().optional().transform((v) => v ?? Date.now()),
 })
 
 export type CreateExpenseInput = z.infer<typeof CreateExpenseSchema>

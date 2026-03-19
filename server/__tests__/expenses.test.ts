@@ -28,6 +28,8 @@ const validPayload = (overrides = {}) => ({
   ...overrides,
 })
 
+const aTimestamp = 1700000000000
+
 describe('POST /expenses', () => {
   it('returns 201 with the created expense and an id', async () => {
     const res = await request(app).post('/expenses').send(validPayload())
@@ -39,6 +41,7 @@ describe('POST /expenses', () => {
       category: 'Food',
       description: 'Lunch',
       type: 'expense',
+      date: expect.any(Number),
     })
   })
 
@@ -51,6 +54,23 @@ describe('POST /expenses', () => {
     expect(saved?.category).toBe('Food')
     expect(saved?.description).toBe('Lunch')
     expect(saved?.type).toBe('expense')
+    expect(saved?.date).toEqual(expect.any(Number))
+  })
+
+  it('uses current timestamp as date when date is omitted', async () => {
+    const before = Date.now()
+    const res = await request(app).post('/expenses').send(validPayload())
+    const after = Date.now()
+
+    expect(res.body.date).toBeGreaterThanOrEqual(before)
+    expect(res.body.date).toBeLessThanOrEqual(after)
+  })
+
+  it('uses the provided date timestamp when date is given', async () => {
+    const res = await request(app).post('/expenses').send(validPayload({ date: aTimestamp }))
+
+    expect(res.status).toBe(201)
+    expect(res.body.date).toBe(aTimestamp)
   })
 
   it("returns 400 with 'amount is required' when amount is omitted", async () => {
@@ -122,11 +142,11 @@ describe('GET /expenses', () => {
     expect(res.body).toEqual([])
   })
 
-  it('returns all expenses with id, amount, category, description, and type fields', async () => {
+  it('returns all expenses with id, amount, category, description, type, and date fields', async () => {
     await ExpenseModel.create([
-      { amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense' },
-      { amount: 15, category: 'Transport', description: 'Bus ticket', type: 'expense' },
-      { amount: 1000, category: 'Job', description: 'Salary', type: 'income' },
+      { amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense', date: aTimestamp },
+      { amount: 15, category: 'Transport', description: 'Bus ticket', type: 'expense', date: aTimestamp },
+      { amount: 1000, category: 'Job', description: 'Salary', type: 'income', date: aTimestamp },
     ])
 
     const res = await request(app).get('/expenses')
@@ -140,15 +160,16 @@ describe('GET /expenses', () => {
         category: expect.any(String),
         description: expect.any(String),
         type: expect.stringMatching(/^expense|income$/),
+        date: expect.any(Number),
       })
     }
   })
 
   it('returns only expenses matching the given category filter', async () => {
     await ExpenseModel.create([
-      { amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense' },
-      { amount: 15, category: 'Transport', description: 'Bus ticket', type: 'expense' },
-      { amount: 12, category: 'Food', description: 'Coffee', type: 'expense' },
+      { amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense', date: aTimestamp },
+      { amount: 15, category: 'Transport', description: 'Bus ticket', type: 'expense', date: aTimestamp },
+      { amount: 12, category: 'Food', description: 'Coffee', type: 'expense', date: aTimestamp },
     ])
 
     const res = await request(app).get('/expenses?category=Food')
@@ -161,7 +182,7 @@ describe('GET /expenses', () => {
   })
 
   it('returns an empty array when no expenses match the category filter', async () => {
-    await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense' })
+    await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense', date: aTimestamp })
 
     const res = await request(app).get('/expenses?category=Transport')
 
@@ -172,7 +193,7 @@ describe('GET /expenses', () => {
 
 describe('GET /expenses/:id', () => {
   it('returns 200 with the expense when found', async () => {
-    const created = await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense' })
+    const created = await ExpenseModel.create({ amount: 42.5, category: 'Food', description: 'Lunch', type: 'expense', date: aTimestamp })
 
     const res = await request(app).get(`/expenses/${created._id.toString()}`)
 
@@ -183,6 +204,7 @@ describe('GET /expenses/:id', () => {
       category: 'Food',
       description: 'Lunch',
       type: 'expense',
+      date: aTimestamp,
     })
   })
 
