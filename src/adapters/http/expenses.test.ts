@@ -8,6 +8,7 @@ const mockExpense: Expense = {
   category: 'Food',
   description: 'Lunch',
   type: 'expense',
+  date: 1700000000000,
 }
 
 const mockFetch = (body: unknown, status = 200) =>

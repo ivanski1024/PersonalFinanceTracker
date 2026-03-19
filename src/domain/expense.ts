@@ -6,6 +6,7 @@ export type Expense = {
   category: string
   description: string
   type: EntryType
+  date: number
 }
 
 export type CreateExpenseInput = {
@@ -13,4 +14,5 @@ export type CreateExpenseInput = {
   category: string
   description: string
   type: EntryType
+  date?: number
 }
